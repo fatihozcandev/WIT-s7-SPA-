@@ -31,7 +31,7 @@ const materials = [
   "Soğan",
   "Sarımsak",
 ];
-const pizzaBoyu = ["Küçük", "Orta", " Büyük"];
+const pizzaBoyu = ["Küçük", "Orta", "Büyük"];
 const hamurKalinligi = ["Seçiniz", "İnce", "Normal", "Kalın", "Peynirli"];
 const sizePrices = {
   kucuk: 0,
@@ -51,7 +51,7 @@ const errorMesages = {
   fullName: "İsminizi giriniz",
   material: "En az 4, en fazla 10 ürün seçmelisiniz.",
   size: "Pizza boyunu seçiniz",
-  paste: "Hamur tipini seçiniz",
+  hamur: "Hamur tipini seçiniz",
 };
 
 const SiparisForm = () => {
@@ -110,19 +110,31 @@ const SiparisForm = () => {
   };
 
   useEffect(() => {
+    const priceCalculator = (formData, quantity, totalPrice) => {
+      const selected = formData.material.length;
+      let totalWithMaterials = 85 * quantity;
+      if (formData.size === "Orta") {
+        totalWithMaterials += 10;
+      } else if (formData.size === "Büyük") {
+        totalWithMaterials += 20;
+      }
+      totalWithMaterials += selected * 5;
+      setTotalPrice(totalWithMaterials);
+    };
     const validateForm = (formData) => {
       const materialValid =
         formData.material.length >= 4 && formData.material.length <= 10;
       const sizeValid = formData.size !== "";
       const hamurValid = formData.hamur !== "Seçiniz";
-      const isimValid = formData.fullName.length > 3;
+      const isimValid = formData.fullName.trim().length > 3;
 
       return materialValid && sizeValid && hamurValid && isimValid;
     };
 
     setIsValid(validateForm(formData));
+    priceCalculator(formData, quantity, totalPrice);
     console.log(formData);
-  }, [formData]);
+  }, [formData, quantity]);
 
   const submitHandler = (event) => {
     event.preventDefault();
@@ -184,7 +196,7 @@ const SiparisForm = () => {
           <Col sm={3}>
             <Input name="hamur" type="select" onChange={handleChange}>
               {hamurKalinligi.map((kalinlik) => {
-                return <option> {kalinlik}</option>;
+                return <option key={kalinlik}> {kalinlik}</option>;
               })}
             </Input>
           </Col>
@@ -287,7 +299,7 @@ const SiparisForm = () => {
       <FormGroup className="siparis-ozeti" check row>
         <Card>
           <CardBody>
-            <FormText>{`Toplam: `}</FormText>
+            <FormText>{`Toplam: ${totalPrice} `}</FormText>
           </CardBody>
           <Col
             sm={{
