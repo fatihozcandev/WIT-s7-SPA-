@@ -3,14 +3,20 @@ import "./App.css";
 import Siparis from "./components/Siparis/Siparis";
 import { Route, Switch } from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0);
+import Success from "./components/Approval/Approval";
+import Main from "./components/Home/Home";
 
+function App() {
   return (
     <Switch className="mai-component-container">
-      <Route exact path="/"></Route>
+      <Route exact path="/">
+        <Main />
+      </Route>
       <Route exact path="/siparis">
         <Siparis />
+      </Route>
+      <Route exact path="/approval">
+        <Success />
       </Route>
     </Switch>
   );

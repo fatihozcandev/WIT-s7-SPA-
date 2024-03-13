@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./SiparisForm.css";
 import {
   Button,
@@ -7,12 +7,13 @@ import {
   CardGroup,
   Col,
   Form,
+  FormFeedback,
   FormGroup,
   FormText,
   Input,
   Label,
 } from "reactstrap";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom";
 
 const materials = [
   "Pepperoni",
@@ -34,24 +35,32 @@ const hamurKalinligi = ["Çok İnce", "İnce", "Normal", "Kalın", "Peynirli"];
 
 const initialValues = {
   size: "",
-  paste: "",
+  hamur: "",
   material: [],
   name: "",
   note: "",
-  count: 1,
 };
 
 const initialErrors = {
-  name: true,
+  name: false,
   material: true,
   size: false,
   paste: false,
 };
 
+const errorMesages = {
+  name: "",
+  material: "En az 4, en fazla 10 ürün seçmelisiniz.",
+  size: "Pizza boyunu seçiniz",
+  paste: "Hamur tipini seçiniz",
+};
+
 const SiparisForm = () => {
-  const [formdata, setFormData] = useState([initialValues]);
+  const [formData, setFormData] = useState(initialValues);
   const history = useHistory();
   const [quantity, setQuantity] = useState(1);
+  const [errors, setErrors] = useState(initialErrors);
+  const [isValid, setIsValid] = useState(false);
 
   const clickHandler = (event) => {
     const { name, id, value } = event.target;
@@ -64,10 +73,55 @@ const SiparisForm = () => {
       history.push("/approval");
     }
   };
+  const handleChange = (event) => {
+    const { name, value, checked } = event.target;
+    if (name == "note") {
+      setFormData({ ...formData, [name]: value });
+    }
+
+    if (name === "size" && checked) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+
+    if (name === "material") {
+      let updatedMaterials = [...formData.material]; // Mevcut malzemelerin bir kopyasını alın
+
+      if (checked) {
+        updatedMaterials.push(value); // Seçilen malzemeyi ekle
+      } else {
+        updatedMaterials = updatedMaterials.filter(
+          (material) => material !== value
+        ); // Seçilmeyen malzemeyi filtrele
+      }
+
+      const updatedForm = {
+        ...formData,
+        [name]: updatedMaterials, // Malzemelerin güncellenmiş listesini formData'ya ata
+      };
+
+      setFormData(updatedForm); // formData'yı güncelle
+    }
+    if (name == "hamur") {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  useEffect(() => {
+    console.log(formData);
+  }, [formData]);
 
   const submitHandler = (event) => {
     event.preventDefault();
-    const [name, value] = event.target;
+    if (!isValid) return;
+    axios
+      .post("https://reqres.in/api/pizza", formData)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => console.error(error));
   };
   return (
     <Form onSubmit={submitHandler}>
@@ -87,78 +141,111 @@ const SiparisForm = () => {
           lezzetli bir yemektir.. Küçük bir pizzaya bazen pizzetta denir.
         </p>
       </FormGroup>
-      <FormGroup row tag="fieldset" className="boyut-radio">
-        <legend className="col-form-label col-sm-2">Radio Buttons</legend>
-        <Col sm={10}>
-          {pizzaBoyu.map((boyut) => {
-            return (
-              <FormGroup check>
-                <Input name="materials" type="radio" />{" "}
-                <Label check>{boyut}</Label>
-              </FormGroup>
-            );
-          })}
-        </Col>
-      </FormGroup>
-      <FormGroup row className="hamur-select">
-        <Label for="exampleSelect" sm={2}>
-          Hamur Seç
-        </Label>
-        <Col sm={10}>
-          <Input id="exampleSelect" name="select" type="select">
-            {hamurKalinligi.map((kalinlik) => {
-              return <option> {kalinlik}</option>;
+      <FormGroup className="hamur-boyut">
+        <FormGroup row tag="fieldset" className="boyut-radio">
+          <legend className="col-form-label col-sm-2">Radio Buttons</legend>
+          <Col sm={3}>
+            {pizzaBoyu.map((boyut) => {
+              return (
+                <FormGroup check>
+                  <Input
+                    key={boyut}
+                    name="size"
+                    type="radio"
+                    onChange={handleChange}
+                    value={boyut}
+                    checked={formData.size === boyut}
+                  />{" "}
+                  <Label for="size" check>
+                    {boyut}
+                  </Label>
+                </FormGroup>
+              );
             })}
-          </Input>
-        </Col>
+          </Col>
+        </FormGroup>
+
+        <FormGroup row className="hamur-select">
+          <Label for="hamur" sm={2}>
+            Hamur Seç
+          </Label>
+          <Col sm={3}>
+            <Input name="hamur" type="select" onChange={handleChange}>
+              {hamurKalinligi.map((kalinlik) => {
+                return <option> {kalinlik}</option>;
+              })}
+            </Input>
+          </Col>
+        </FormGroup>
       </FormGroup>
       <FormGroup row className="material-check">
         <Label for="material" sm={2}>
           Ek Malzemeler
         </Label>
-        <Col
-          sm={{
-            size: 10,
-          }}
-        >
+        <Col sm={10}>
           <FormGroup check>
             {materials.map((material) => {
               return (
-                <Label
-                  check
-                  sm={{
-                    size: 5,
-                  }}
-                >
-                  <Input id="mateial" type="checkbox" /> {material}
+                <Label check sm={5} for="material">
+                  {/* buraya checkboxa margin  ekle 
+                ve 
+                text alignı iptal et 
+                */}
+                  <Input
+                    name="material"
+                    type="checkbox"
+                    onChange={handleChange}
+                    value={material}
+                    checked={formData.material.includes(material)}
+                  />
+                  {material}
                 </Label>
               );
             })}
+            <FormFeedback>
+              {errors.material && (
+                <p className="formFeedback">{errorMesages.material}</p>
+              )}
+            </FormFeedback>
           </FormGroup>
         </Col>
       </FormGroup>
       <FormGroup row className="siparis-notu">
-        <Label for="exampleText" sm={2}>
+        <Label for="note" sm={2}>
           Sipariş Notu:
         </Label>
         <Col sm={10}>
           <Input
-            id="exampleText"
-            name="text"
+            name="note"
             type="textarea"
             placeholder="Sipariş notunuzu ekleyebilirsiniz"
+            onChange={handleChange}
+            value={formData.note}
           />
         </Col>
       </FormGroup>
       <FormGroup className="quantity-group">
         <CardGroup>
-          <Button name="minus" color="warning" onClick={clickHandler}>
+          <Label> Adet</Label>
+
+          <Button
+            type="button"
+            name="minus"
+            color="warning"
+            onClick={clickHandler}
+          >
             -
           </Button>
+          <Col xs={1}>
+            <FormText sm={2}>{quantity}</FormText>
+          </Col>
 
-          <FormText>{"  " + quantity + "  "}</FormText>
-
-          <Button name="plus" color="warning" onClick={clickHandler}>
+          <Button
+            type="button"
+            name="plus"
+            color="warning"
+            onClick={clickHandler}
+          >
             +
           </Button>
         </CardGroup>
@@ -171,11 +258,16 @@ const SiparisForm = () => {
               offset: 2,
               size: 10,
             }}
+          ></Col>
+
+          <Button
+            name="order"
+            color="warning"
+            type="submit"
+            onClick={clickHandler}
           >
-            <Button name="order" color="warning" onClick={clickHandler}>
-              Sipariş ver
-            </Button>
-          </Col>
+            Sipariş ver
+          </Button>
         </Card>
       </FormGroup>
     </Form>
