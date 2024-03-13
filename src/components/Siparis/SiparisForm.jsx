@@ -14,6 +14,7 @@ import {
   Label,
 } from "reactstrap";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
 
 const materials = [
   "Pepperoni",
@@ -31,25 +32,23 @@ const materials = [
   "Sarımsak",
 ];
 const pizzaBoyu = ["Küçük", "Orta", " Büyük"];
-const hamurKalinligi = ["Çok İnce", "İnce", "Normal", "Kalın", "Peynirli"];
+const hamurKalinligi = ["Seçiniz", "İnce", "Normal", "Kalın", "Peynirli"];
+const sizePrices = {
+  kucuk: 0,
+  orta: 10,
+  buyuk: 20,
+};
 
 const initialValues = {
   size: "",
   hamur: "",
   material: [],
-  name: "",
+  fullName: "",
   note: "",
 };
 
-const initialErrors = {
-  name: false,
-  material: true,
-  size: false,
-  paste: false,
-};
-
 const errorMesages = {
-  name: "",
+  fullName: "İsminizi giriniz",
   material: "En az 4, en fazla 10 ürün seçmelisiniz.",
   size: "Pizza boyunu seçiniz",
   paste: "Hamur tipini seçiniz",
@@ -59,8 +58,8 @@ const SiparisForm = () => {
   const [formData, setFormData] = useState(initialValues);
   const history = useHistory();
   const [quantity, setQuantity] = useState(1);
-  const [errors, setErrors] = useState(initialErrors);
   const [isValid, setIsValid] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const clickHandler = (event) => {
     const { name, id, value } = event.target;
@@ -78,6 +77,9 @@ const SiparisForm = () => {
     if (name == "note") {
       setFormData({ ...formData, [name]: value });
     }
+    if (name == "fullName") {
+      setFormData({ ...formData, [name]: value });
+    }
 
     if (name === "size" && checked) {
       setFormData({
@@ -88,7 +90,6 @@ const SiparisForm = () => {
 
     if (name === "material") {
       let updatedMaterials = [...formData.material]; // Mevcut malzemelerin bir kopyasını alın
-
       if (checked) {
         updatedMaterials.push(value); // Seçilen malzemeyi ekle
       } else {
@@ -101,7 +102,6 @@ const SiparisForm = () => {
         ...formData,
         [name]: updatedMaterials, // Malzemelerin güncellenmiş listesini formData'ya ata
       };
-
       setFormData(updatedForm); // formData'yı güncelle
     }
     if (name == "hamur") {
@@ -110,16 +110,28 @@ const SiparisForm = () => {
   };
 
   useEffect(() => {
+    const validateForm = (formData) => {
+      const materialValid =
+        formData.material.length >= 4 && formData.material.length <= 10;
+      const sizeValid = formData.size !== "";
+      const hamurValid = formData.hamur !== "Seçiniz";
+      const isimValid = formData.fullName.length > 3;
+
+      return materialValid && sizeValid && hamurValid && isimValid;
+    };
+
+    setIsValid(validateForm(formData));
     console.log(formData);
   }, [formData]);
 
   const submitHandler = (event) => {
     event.preventDefault();
-    if (!isValid) return;
+
     axios
       .post("https://reqres.in/api/pizza", formData)
       .then((response) => {
         console.log(response.data);
+        history.push("/approval");
       })
       .catch((error) => console.error(error));
   };
@@ -141,7 +153,7 @@ const SiparisForm = () => {
           lezzetli bir yemektir.. Küçük bir pizzaya bazen pizzetta denir.
         </p>
       </FormGroup>
-      <FormGroup className="hamur-boyut">
+      <FormGroup row className="hamur-boyut">
         <FormGroup row tag="fieldset" className="boyut-radio">
           <legend className="col-form-label col-sm-2">Radio Buttons</legend>
           <Col sm={3}>
@@ -178,7 +190,7 @@ const SiparisForm = () => {
           </Col>
         </FormGroup>
       </FormGroup>
-      <FormGroup row className="material-check">
+      <FormGroup col className="material-check">
         <Label for="material" sm={2}>
           Ek Malzemeler
         </Label>
@@ -186,7 +198,7 @@ const SiparisForm = () => {
           <FormGroup check>
             {materials.map((material) => {
               return (
-                <Label check sm={5} for="material">
+                <Label invalid check sm={5} for="material">
                   {/* buraya checkboxa margin  ekle 
                 ve 
                 text alignı iptal et 
@@ -202,11 +214,12 @@ const SiparisForm = () => {
                 </Label>
               );
             })}
-            <FormFeedback>
-              {errors.material && (
-                <p className="formFeedback">{errorMesages.material}</p>
-              )}
-            </FormFeedback>
+            {(formData.material.length < 4 ||
+              formData.material.length > 10) && (
+              <Col>
+                <FormText color="danger">{errorMesages.material}</FormText>
+              </Col>
+            )}
           </FormGroup>
         </Col>
       </FormGroup>
@@ -216,6 +229,7 @@ const SiparisForm = () => {
         </Label>
         <Col sm={10}>
           <Input
+            id="note"
             name="note"
             type="textarea"
             placeholder="Sipariş notunuzu ekleyebilirsiniz"
@@ -250,9 +264,31 @@ const SiparisForm = () => {
           </Button>
         </CardGroup>
       </FormGroup>
+      <FormGroup row>
+        <Label for="note" sm={2}>
+          İsim Soyisim:
+        </Label>
+
+        <Col sm={10}>
+          <Input
+            name="fullName"
+            type="textarea"
+            placeholder="İsim giriniz"
+            onChange={handleChange}
+            value={formData.fullName}
+          />
+        </Col>
+        {formData.fullName.trim().length < 4 && (
+          <Col>
+            <FormText color="danger">{errorMesages.fullName}</FormText>
+          </Col>
+        )}
+      </FormGroup>
       <FormGroup className="siparis-ozeti" check row>
         <Card>
-          <CardBody>Buraya sipariş toplamı detayları gelecek</CardBody>
+          <CardBody>
+            <FormText>{`Toplam: `}</FormText>
+          </CardBody>
           <Col
             sm={{
               offset: 2,
@@ -261,10 +297,10 @@ const SiparisForm = () => {
           ></Col>
 
           <Button
+            disabled={!isValid}
             name="order"
             color="warning"
             type="submit"
-            onClick={clickHandler}
           >
             Sipariş ver
           </Button>

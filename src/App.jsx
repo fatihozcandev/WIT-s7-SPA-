@@ -1,8 +1,6 @@
-import { useState } from "react";
 import "./App.css";
-import Siparis from "./components/Siparis/Siparis";
 import { Route, Switch } from "react-router-dom";
-
+import Siparis from "./components/Siparis/Siparis";
 import Success from "./components/Approval/Approval";
 import Main from "./components/Home/Home";
 
