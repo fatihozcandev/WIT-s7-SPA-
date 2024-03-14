@@ -179,6 +179,7 @@ const SiparisForm = () => {
                     onChange={handleChange}
                     value={boyut}
                     checked={formData.size === boyut}
+                    data-cy="boyut"
                   />{" "}
                   <Label for="size" check>
                     {boyut}
@@ -194,7 +195,12 @@ const SiparisForm = () => {
             Hamur Seç
           </Label>
           <Col sm={3}>
-            <Input name="hamur" type="select" onChange={handleChange}>
+            <Input
+              name="hamur"
+              type="select"
+              onChange={handleChange}
+              data-cy="kalinlik"
+            >
               {hamurKalinligi.map((kalinlik) => {
                 return <option key={kalinlik}> {kalinlik}</option>;
               })}
@@ -299,7 +305,7 @@ const SiparisForm = () => {
       <FormGroup className="siparis-ozeti" check row>
         <Card>
           <CardBody>
-            <FormText>{`Toplam: ${totalPrice} `}</FormText>
+            <FormText data-cy="toplam">{`Toplam: ${totalPrice} `}</FormText>
           </CardBody>
           <Col
             sm={{

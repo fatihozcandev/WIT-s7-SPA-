@@ -22,7 +22,9 @@ export default function Main() {
       <p className="mainP">KOD ACIKTIRIR </p>
       <p className="mainP">PIZZA, DOYURUR</p>
       <Link to="/siparis">
-        <Button style={customButtonStyle}>Acıktım</Button>
+        <Button data-cy="aciktim" style={customButtonStyle}>
+          Acıktım
+        </Button>
       </Link>
     </div>
   );
