@@ -304,8 +304,8 @@ const SiparisForm = () => {
       </FormGroup>
       <FormGroup className="siparis-ozeti" check row>
         <Card>
-          <CardBody>
-            <FormText data-cy="toplam">{`Toplam: ${totalPrice} `}</FormText>
+          <CardBody data-cy="toplam">
+            <FormText>{`Toplam: ${totalPrice} `}</FormText>
           </CardBody>
           <Col
             sm={{
@@ -319,6 +319,7 @@ const SiparisForm = () => {
             name="order"
             color="warning"
             type="submit"
+            data-cy="submit-btn"
           >
             Sipariş ver
           </Button>
