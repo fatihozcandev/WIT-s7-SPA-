@@ -4,7 +4,7 @@ import "./SiparisHeader.css";
 export default function SiparisHeader() {
   return (
     <header className="siparis-header">
-      <img src="./Assets/mile1-assets/logo.svg" />
+      <img className="logo" src="./Assets/mile1-assets/logo.svg" />
       <p>
         Anasayfa - Seçenekler -<span id="secili-bolum"> Deneme</span>
       </p>

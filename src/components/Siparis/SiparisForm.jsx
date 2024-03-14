@@ -150,7 +150,7 @@ const SiparisForm = () => {
   return (
     <Form onSubmit={submitHandler}>
       <FormGroup className="pizza-description">
-        <h2>Position Absulute Acı Pizza</h2>
+        <h2>Acı Pizza</h2>
         <div className="price-details">
           <h3>85.50₺</h3>
           <p>4.9</p>

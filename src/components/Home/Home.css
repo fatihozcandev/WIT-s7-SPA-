@@ -1,0 +1,49 @@
+.main-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4rem;
+  justify-content: start;
+  align-items: center;
+  height: 100vh;
+}
+
+.logo {
+  margin-bottom: 20px;
+  height: 80px;
+}
+.metinler {
+  font-size: 2.5rem;
+  color: white;
+  font-family: "Satisfy";
+}
+
+.fullscreen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.overlay h1 {
+  font-size: 2em;
+  font-weight: lighter;
+  font-size: 50px;
+  margin-top: 3%;
+}
+
+.overlay button {
+  padding: 8px 40px;
+  font-size: 1em;
+  background-color: #fdc913;
+  color: black;
+  border: none;
+  border-radius: 30px;
+}
+
+.overlay button a {
+  text-decoration: none;
+  color: white;
+}
